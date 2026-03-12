@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:#0f172a;
+color:white;
+}
+
+nav{
+display:flex;
+justify-content:space-between;
+padding:20px 60px;
+background:#020617;
+}
+
+nav ul{
+display:flex;
+gap:25px;
+list-style:none;
+}
+
+.logo{
+color:#38bdf8;
+}
+
+.hero{
+text-align:center;
+padding:140px 20px;
+background:linear-gradient(120deg,#2563eb,#06b6d4);
+}
+
+.hero h1{
+font-size:60px;
+margin-bottom:10px;
+}
+
+.hero p{
+font-size:18px;
+}
+
+.cta{
+margin-top:30px;
+padding:15px 40px;
+border:none;
+border-radius:30px;
+font-size:16px;
+background:white;
+color:#2563eb;
+cursor:pointer;
+transition:0.3s;
+}
+
+.cta:hover{
+transform:scale(1.1);
+}
+
+.features{
+display:flex;
+justify-content:center;
+gap:40px;
+padding:80px;
+}
+
+.feature-card{
+background:#1e293b;
+padding:40px;
+border-radius:15px;
+width:250px;
+text-align:center;
+transition:0.3s;
+}
+
+.feature-card:hover{
+transform:translateY(-12px);
+box-shadow:0 15px 40px rgba(0,0,0,0.6);
+}
+
+.stats{
+display:flex;
+justify-content:center;
+gap:120px;
+padding:80px;
+background:#020617;
+text-align:center;
+}
+
+.stats h2{
+font-size:40px;
+color:#38bdf8;
+}
+
+footer{
+text-align:center;
+padding:30px;
+background:#020617;
+}
+
+@media(max-width:768px){
+
+.features{
+flex-direction:column;
+align-items:center;
+}
+
+.stats{
+flex-direction:column;
+gap:40px;
+}
+
+.hero h1{
+font-size:40px;
+}
+
+}
+</style>
+
+<head>
+<meta charset="UTF-8">
+<title>CodeForge Bootcamp</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<nav>
+
+<h2 class="logo">CodeForge</h2>
+
+<ul>
+<li>Home</li>
+<li>Course</li>
+<li>Projects</li>
+<li>Contact</li>
+</ul>
+
+</nav>
+
+<section class="hero">
+
+<h1>Become a Web Developer</h1>
+
+<p>Master HTML, CSS & JavaScript by building real-world projects.</p>
+
+<button class="cta">Start Learning</button>
+
+</section>
+
+<section class="features">
+
+<div class="feature-card">
+<h3>Frontend</h3>
+<p>Build stunning UI with modern technologies.</p>
+</div>
+
+<div class="feature-card">
+<h3>Real Projects</h3>
+<p>Create portfolio-ready applications.</p>
+</div>
+
+<div class="feature-card">
+<h3>Career Ready</h3>
+<p>Prepare for internships and tech jobs.</p>
+</div>
+
+</section>
+
+<section class="stats">
+
+<div>
+<h2>5000+</h2>
+<p>Students</p>
+</div>
+
+<div>
+<h2>120+</h2>
+<p>Projects</p>
+</div>
+
+<div>
+<h2>50+</h2>
+<p>Mentors</p>
+</div>
+
+</section>
+
+<footer>
+
+<p>© 2026 CodeForge Bootcamp</p>
+
+</footer>
+
+</body>
+</html>
