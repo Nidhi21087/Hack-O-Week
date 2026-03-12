@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+height:100vh;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+color:white;
+background:linear-gradient(-45deg,#1e3c72,#2a5298,#4facfe,#00f2fe);
+background-size:400% 400%;
+animation:gradientMove 10s ease infinite;
+}
+
+@keyframes gradientMove{
+0%{background-position:0% 50%;}
+50%{background-position:100% 50%;}
+100%{background-position:0% 50%;}
+}
+
+.title{
+font-size:40px;
+margin-bottom:40px;
+}
+
+.weather-container{
+display:flex;
+gap:30px;
+}
+
+.card{
+background:rgba(255,255,255,0.15);
+backdrop-filter:blur(12px);
+border-radius:15px;
+padding:30px;
+width:200px;
+text-align:center;
+transition:0.4s;
+}
+
+.card:hover{
+transform:translateY(-15px) scale(1.05);
+box-shadow:0 10px 40px rgba(0,0,0,0.4);
+}
+
+.icon{
+font-size:40px;
+margin-bottom:10px;
+}
+
+.temp{
+font-size:32px;
+font-weight:bold;
+}
+</style>
+<head>
+<meta charset="UTF-8">
+<title>WeatherX Dashboard</title>
+
+<link rel="stylesheet" href="weather.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+
+<body>
+
+<h1 class="title">WeatherX Dashboard</h1>
+
+<div class="weather-container">
+
+<div class="card">
+<i class="fas fa-sun icon"></i>
+<h2>Nagpur</h2>
+<p class="temp">32°C</p>
+<p>Sunny</p>
+</div>
+
+<div class="card">
+<i class="fas fa-cloud icon"></i>
+<h2>Delhi</h2>
+<p class="temp">27°C</p>
+<p>Cloudy</p>
+</div>
+
+<div class="card">
+<i class="fas fa-cloud-rain icon"></i>
+<h2>Mumbai</h2>
+<p class="temp">29°C</p>
+<p>Rainy</p>
+</div>
+
+</div>
+
+</body>
+</html>
