@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Library Catalogue</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #74ebd5, #ACB6E5);
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+
+    .container {
+      width: 600px;              /* Increased width */
+      margin: 80px auto;         /* More spacing from top */
+      background: #ffffff;
+      padding: 30px;             /* More inner space */
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+
+    h2 {
+      color: #333;
+      font-size: 28px;
+    }
+
+    input, button {
+      margin: 8px;
+      padding: 12px;
+      width: 90%;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+    }
+
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #45a049;
+    }
+
+    ul {
+      text-align: left;
+      padding: 0;
+      list-style-type: none;
+    }
+
+    li {
+      background: #f1f1f1;
+      margin: 6px 0;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>📚 Library Catalogue</h2>
+
+  <input type="text" id="title" placeholder="Book Title">
+  <input type="text" id="author" placeholder="Author">
+  <button onclick="addBook()">Add Book</button>
+
+  <input type="text" id="searchTitle" placeholder="Search by Title">
+  <button onclick="searchBook()">Search</button>
+
+  <input type="text" id="removeTitle" placeholder="Remove by Title">
+  <button onclick="removeBook()">Remove Book</button>
+
+  <h3>Catalogue</h3>
+  <ul id="bookList"></ul>
+</div>
+
+<script>
+  const MAX_BOOKS = 10;
+  let books = [];
+
+  function displayBooks(list = books) {
+    const ul = document.getElementById("bookList");
+    ul.innerHTML = "";
+
+    list.forEach(book => {
+      const li = document.createElement("li");
+      li.textContent = `${book.title} by ${book.author}`;
+      ul.appendChild(li);
+    });
+  }
+
+  function addBook() {
+    const title = document.getElementById("title").value.trim();
+    const author = document.getElementById("author").value.trim();
+
+    if (!title || !author) {
+      alert("Please enter both title and author.");
+      return;
+    }
+
+    if (books.length >= MAX_BOOKS) {
+      alert("Catalogue is full!");
+      return;
+    }
+
+    books.push({ title, author });
+    displayBooks();
+
+    document.getElementById("title").value = "";
+    document.getElementById("author").value = "";
+  }
+
+  function removeBook() {
+    const title = document.getElementById("removeTitle").value.trim().toLowerCase();
+
+    const index = books.findIndex(book => book.title.toLowerCase() === title);
+
+    if (index === -1) {
+      alert("Book not found!");
+      return;
+    }
+
+    books.splice(index, 1);
+    displayBooks();
+
+    document.getElementById("removeTitle").value = "";
+  }
+
+  function searchBook() {
+    const searchTitle = document.getElementById("searchTitle").value.trim().toLowerCase();
+
+    const results = books.filter(book =>
+      book.title.toLowerCase().includes(searchTitle)
+    );
+
+    if (results.length === 0) {
+      alert("No books found!");
+    }
+
+    displayBooks(results);
+  }
+
+  displayBooks();
+</script>
+
+</body>
+</html>
