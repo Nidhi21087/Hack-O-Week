@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Exam Score Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+:root{
+  --bg:#0e0c0a;
+  --surface:#181410;
+  --surface2:#221e18;
+  --border:rgba(255,210,100,0.15);
+  --gold:#f5c842;
+  --gold-dim:#b8902a;
+  --gold-pale:#fdf3c8;
+  --green:#4caf7d;
+  --blue:#5b9cf6;
+  --orange:#f07d3a;
+  --red:#e05c5c;
+  --gray:#6b6560;
+  --text:#f5f0e8;
+  --muted:#8a8278;
+}
+
+body{
+  font-family:'Outfit',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  padding:0 0 4rem;
+}
+
+/* grid background */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(245,200,66,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(245,200,66,0.04) 1px,transparent 1px);
+  background-size:40px 40px;
+}
+
+.page{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:2.5rem 1.5rem;}
+
+/* header */
+.header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:2.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border);}
+.header-left h1{font-family:'DM Serif Display',serif;font-size:38px;font-weight:400;color:var(--gold);letter-spacing:-0.5px;line-height:1.1;}
+.header-left p{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);margin-top:6px;letter-spacing:1px;}
+.header-badge{
+  font-family:'DM Mono',monospace;font-size:11px;
+  padding:6px 14px;border-radius:4px;
+  border:1px solid var(--border);color:var(--gold);
+  background:rgba(245,200,66,0.06);letter-spacing:1px;
+}
+
+/* stat cards */
+.stats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:1.5rem;}
+.stat-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:6px;padding:16px 14px;
+  position:relative;overflow:hidden;
+}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.stat-card.c-gold::before{background:var(--gold);}
+.stat-card.c-green::before{background:var(--green);}
+.stat-card.c-red::before{background:var(--red);}
+.stat-card.c-blue::before{background:var(--blue);}
+.stat-val{font-size:28px;font-weight:700;font-family:'DM Mono',monospace;color:var(--text);}
+.stat-val.gold{color:var(--gold);}
+.stat-val.green{color:var(--green);}
+.stat-val.red{color:var(--red);}
+.stat-val.blue{color:var(--blue);}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:0.5px;text-transform:uppercase;}
+
+/* secondary stats */
+.sec-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:2rem;}
+.sec-stat{background:var(--surface2);border-radius:6px;padding:12px 10px;text-align:center;}
+.sec-val{font-size:18px;font-weight:600;font-family:'DM Mono',monospace;color:var(--text);}
+.sec-lbl{font-size:10px;color:var(--muted);margin-top:3px;letter-spacing:0.5px;text-transform:uppercase;}
+
+/* input section */
+.input-section{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:1.2rem 1.4rem;margin-bottom:1.5rem;
+}
+.input-section-title{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;}
+.input-row{display:flex;gap:8px;flex-wrap:wrap;}
+.input-row input, .input-row select{
+  padding:10px 14px;font-size:13px;font-family:'Outfit',sans-serif;
+  border:1px solid rgba(255,255,255,0.1);border-radius:6px;
+  background:rgba(255,255,255,0.04);color:var(--text);outline:none;
+  transition:border-color 0.2s,box-shadow 0.2s;
+}
+.input-row input::placeholder{color:var(--muted);}
+.input-row input:focus,.input-row select:focus{
+  border-color:var(--gold-dim);
+  box-shadow:0 0 0 3px rgba(245,200,66,0.12);
+}
+.input-row input.name-f{flex:2;min-width:140px;}
+.input-row input.score-f{flex:1;min-width:90px;}
+.btn{
+  padding:10px 18px;font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;
+  border-radius:6px;border:1px solid rgba(255,255,255,0.12);
+  cursor:pointer;background:var(--surface2);color:var(--text);
+  transition:all 0.15s;letter-spacing:0.2px;
+  white-space:nowrap;
+}
+.btn:hover{border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.08);}
+.btn:active{transform:scale(0.97);}
+.btn.primary{background:var(--gold);color:#0e0c0a;border-color:var(--gold);font-weight:700;}
+.btn.primary:hover{background:#ffd830;}
+.btn.bulk{background:rgba(91,156,246,0.12);color:var(--blue);border-color:rgba(91,156,246,0.3);}
+.btn.bulk:hover{background:rgba(91,156,246,0.2);}
+.btn.danger{background:rgba(224,92,92,0.1);color:var(--red);border-color:rgba(224,92,92,0.3);}
+.btn.danger:hover{background:rgba(224,92,92,0.2);}
+
+/* filter pills */
+.filter-row{display:flex;gap:6px;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center;}
+.filter-lbl{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:1px;}
+.pill{
+  padding:5px 14px;border-radius:4px;font-size:12px;font-weight:600;
+  border:1px solid rgba(255,255,255,0.1);cursor:pointer;
+  background:transparent;color:var(--muted);transition:all 0.15s;
+}
+.pill:hover{color:var(--text);border-color:rgba(255,255,255,0.25);}
+.pill.active-a{background:rgba(76,175,125,0.15);color:var(--green);border-color:rgba(76,175,125,0.4);}
+.pill.active-b{background:rgba(91,156,246,0.15);color:var(--blue);border-color:rgba(91,156,246,0.4);}
+.pill.active-c{background:rgba(240,125,58,0.15);color:var(--orange);border-color:rgba(240,125,58,0.4);}
+.pill.active-d{background:rgba(224,92,92,0.15);color:var(--red);border-color:rgba(224,92,92,0.4);}
+.pill.active-f{background:rgba(107,101,96,0.25);color:#aaa;border-color:rgba(255,255,255,0.2);}
+.pill.active-all{background:rgba(245,200,66,0.12);color:var(--gold);border-color:rgba(245,200,66,0.35);}
+
+/* chart */
+.chart-section{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1.2rem 1.4rem;margin-bottom:1.5rem;}
+.section-title{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px;}
+.chart-legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px;}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);}
+.legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+.chart-wrap{position:relative;width:100%;height:220px;}
+
+/* scores grid */
+.scores-section{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1.2rem 1.4rem;margin-bottom:1.5rem;}
+.scores-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px;}
+.score-chip{
+  padding:10px 6px;text-align:center;border-radius:6px;
+  border:1px solid rgba(255,255,255,0.08);
+  background:var(--surface2);
+  position:relative;cursor:default;
+  transition:border-color 0.15s,transform 0.15s;
+  animation:popIn 0.25s ease;
+}
+@keyframes popIn{from{opacity:0;transform:scale(0.85);}to{opacity:1;transform:scale(1);}}
+.score-chip:hover{transform:translateY(-2px);border-color:rgba(255,255,255,0.2);}
+.score-chip .sc-val{font-size:18px;font-weight:700;font-family:'DM Mono',monospace;}
+.score-chip .sc-name{font-size:10px;color:var(--muted);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.score-chip .sc-grade{font-size:10px;font-weight:600;margin-top:2px;}
+.score-chip .rm-btn{
+  display:none;position:absolute;top:-7px;right:-7px;
+  width:18px;height:18px;border-radius:50%;
+  background:var(--red);color:#fff;font-size:10px;
+  align-items:center;justify-content:center;cursor:pointer;border:none;
+  line-height:1;
+}
+.score-chip:hover .rm-btn{display:flex;}
+.score-chip.is-mode{box-shadow:0 0 0 2px var(--gold);}
+.chip-a{border-color:rgba(76,175,125,0.4);} .chip-a .sc-val{color:var(--green);} .chip-a .sc-grade{color:var(--green);}
+.chip-b{border-color:rgba(91,156,246,0.35);} .chip-b .sc-val{color:var(--blue);} .chip-b .sc-grade{color:var(--blue);}
+.chip-c{border-color:rgba(240,125,58,0.35);} .chip-c .sc-val{color:var(--orange);} .chip-c .sc-grade{color:var(--orange);}
+.chip-d{border-color:rgba(224,92,92,0.3);} .chip-d .sc-val{color:var(--red);} .chip-d .sc-grade{color:var(--red);}
+.chip-f .sc-val{color:var(--muted);} .chip-f .sc-grade{color:var(--gray);}
+
+.empty-state{text-align:center;padding:2.5rem;border:1px dashed rgba(255,255,255,0.08);border-radius:8px;}
+.empty-icon{font-size:32px;display:block;margin-bottom:10px;opacity:0.3;}
+.empty-txt{font-size:14px;color:var(--muted);}
+
+/* frequency table */
+.freq-section{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1.2rem 1.4rem;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{text-align:left;padding:8px 10px;font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:0.8px;text-transform:uppercase;border-bottom:1px solid var(--border);}
+tbody td{padding:9px 10px;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--text);vertical-align:middle;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:rgba(255,255,255,0.02);}
+.bar-wrap{background:rgba(255,255,255,0.06);border-radius:3px;height:8px;overflow:hidden;width:120px;}
+.bar-fill{height:100%;border-radius:3px;transition:width 0.4s ease;}
+
+/* toast */
+.toast{
+  position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(70px);
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:8px;padding:10px 22px;font-size:13px;
+  color:var(--text);z-index:100;transition:transform 0.3s ease;
+  pointer-events:none;white-space:nowrap;font-family:'DM Mono',monospace;
+}
+.toast.show{transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="header">
+    <div class="header-left">
+      <h1>Exam Score Tracker</h1>
+
+    </div>
+    <div class="header-badge" id="class-grade">CLASS: —</div>
+  </div>
+
+  <!-- Primary Stats -->
+  <div class="stats-grid">
+    <div class="stat-card c-gold">
+      <div class="stat-val gold" id="v-count">0</div>
+      <div class="stat-lbl">Students</div>
+    </div>
+    <div class="stat-card c-green">
+      <div class="stat-val green" id="v-max">—</div>
+      <div class="stat-lbl">Max Score</div>
+    </div>
+    <div class="stat-card c-red">
+      <div class="stat-val red" id="v-min">—</div>
+      <div class="stat-lbl">Min Score</div>
+    </div>
+    <div class="stat-card c-blue">
+      <div class="stat-val blue" id="v-mode">—</div>
+      <div class="stat-lbl">Mode</div>
+    </div>
+  </div>
+
+  <!-- Secondary Stats -->
+  <div class="sec-stats">
+    <div class="sec-stat"><div class="sec-val" id="v-avg">—</div><div class="sec-lbl">Average</div></div>
+    <div class="sec-stat"><div class="sec-val" id="v-median">—</div><div class="sec-lbl">Median</div></div>
+    <div class="sec-stat"><div class="sec-val" id="v-range">—</div><div class="sec-lbl">Range</div></div>
+    <div class="sec-stat"><div class="sec-val" id="v-pass">—</div><div class="sec-lbl">Pass Rate</div></div>
+    <div class="sec-stat"><div class="sec-val" id="v-above">—</div><div class="sec-lbl">Above Avg</div></div>
+  </div>
+
+  <!-- Input -->
+  <div class="input-section">
+    <div class="input-section-title">Add Score</div>
+    <div class="input-row">
+      <input class="name-f" id="name-in" placeholder="Student name (optional)"/>
+      <input class="score-f" id="score-in" type="number" min="0" max="100" placeholder="Score (0–100)"/>
+      <button class="btn primary" onclick="addScore()">+ Add Score</button>
+      <button class="btn bulk" onclick="bulkAdd()">⚡ Bulk Fill (20)</button>
+      <button class="btn danger" onclick="clearAll()">✕ Clear All</button>
+    </div>
+  </div>
+
+  <!-- Filter -->
+  <div class="filter-row">
+    <span class="filter-lbl">FILTER:</span>
+    <button class="pill active-all" data-g="all" onclick="setFilter(this,'all')">All</button>
+    <button class="pill" data-g="A" onclick="setFilter(this,'A')">A · 90–100</button>
+    <button class="pill" data-g="B" onclick="setFilter(this,'B')">B · 80–89</button>
+    <button class="pill" data-g="C" onclick="setFilter(this,'C')">C · 70–79</button>
+    <button class="pill" data-g="D" onclick="setFilter(this,'D')">D · 60–69</button>
+    <button class="pill" data-g="F" onclick="setFilter(this,'F')">F · &lt;60</button>
+  </div>
+
+  <!-- Chart -->
+  <div class="chart-section">
+    <div class="section-title">Score Distribution</div>
+    <div class="chart-legend">
+      <span class="legend-item"><span class="legend-dot" style="background:#4caf7d;"></span>A (90–100)</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#5b9cf6;"></span>B (80–89)</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#f07d3a;"></span>C (70–79)</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#e05c5c;"></span>D (60–69)</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#6b6560;"></span>F (&lt;60)</span>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="chartCanvas" role="img" aria-label="Bar chart showing exam score frequency distribution across grade buckets">No chart data yet.</canvas>
+    </div>
+  </div>
+
+  <!-- Scores Grid -->
+  <div class="scores-section">
+    <div class="section-title">All Scores <span id="filter-note" style="color:var(--gold);margin-left:6px;"></span></div>
+    <div class="scores-grid" id="scores-grid">
+      <div class="empty-state" style="grid-column:1/-1;">
+        <span class="empty-icon">📋</span>
+        <div class="empty-txt">No scores yet — add one above or use Bulk Fill!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Frequency Table -->
+  <div class="freq-section">
+    <div class="section-title">Frequency Table · Linear Traversal</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Bucket</th>
+          <th>Grade</th>
+          <th>Students</th>
+          <th>Count</th>
+          <th style="width:140px;">Frequency</th>
+          <th>%</th>
+        </tr>
+      </thead>
+      <tbody id="freq-body">
+        <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:16px;">No data yet</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let scores = [];
+let activeFilter = 'all';
+let chartInst = null;
+
+const buckets = ['0–9','10–19','20–29','30–39','40–49','50–59','60–69','70–79','80–89','90–100'];
+const bucketColors = ['#6b6560','#6b6560','#6b6560','#6b6560','#6b6560','#6b6560','#e05c5c','#f07d3a','#5b9cf6','#4caf7d'];
+const gradeOf = s => s>=90?'A':s>=80?'B':s>=70?'C':s>=60?'D':'F';
+const bucketOf = s => Math.min(Math.floor(s/10),9);
+const chipClass = s => 'chip-'+gradeOf(s).toLowerCase();
+const gradeColor = g => ({A:'#4caf7d',B:'#5b9cf6',C:'#f07d3a',D:'#e05c5c',F:'#6b6560'}[g]);
+
+function compute() {
+  if (!scores.length) return null;
+  const vals = scores.map(x => x.score);
+  const freq = new Array(101).fill(0);
+  vals.forEach(v => freq[v]++);
+
+  let min = 100, max = 0, modeVal = 0, modeCount = 0;
+  for (let i = 0; i <= 100; i++) {
+    if (freq[i] > 0) { if (i < min) min = i; if (i > max) max = i; }
+    if (freq[i] > modeCount) { modeCount = freq[i]; modeVal = i; }
+  }
+
+  const sorted = [...vals].sort((a,b) => a-b);
+  const n = sorted.length;
+  const median = n%2===0 ? (sorted[n/2-1]+sorted[n/2])/2 : sorted[Math.floor(n/2)];
+  const avg = vals.reduce((a,b) => a+b, 0) / n;
+  const above = vals.filter(v => v > avg).length;
+  const pass = vals.filter(v => v >= 60).length;
+
+  const bFreq = new Array(10).fill(0);
+  vals.forEach(v => bFreq[bucketOf(v)]++);
+
+  const avgGrade = avg>=90?'A':avg>=80?'B':avg>=70?'C':avg>=60?'D':'F';
+
+  return { min, max, mode: modeVal, modeCount, median: Math.round(median*10)/10,
+           avg: Math.round(avg*10)/10, range: max-min, above, pass, n, freq, bFreq, avgGrade };
+}
+
+function render() {
+  const c = compute();
+  document.getElementById('v-count').textContent = scores.length;
+  document.getElementById('v-max').textContent = c ? c.max : '—';
+  document.getElementById('v-min').textContent = c ? c.min : '—';
+  document.getElementById('v-mode').textContent = c ? c.mode + ' (×' + c.modeCount + ')' : '—';
+  document.getElementById('v-avg').textContent = c ? c.avg : '—';
+  document.getElementById('v-median').textContent = c ? c.median : '—';
+  document.getElementById('v-range').textContent = c ? c.range : '—';
+  document.getElementById('v-pass').textContent = c ? Math.round(c.pass/c.n*100) + '%' : '—';
+  document.getElementById('v-above').textContent = c ? c.above + '/' + c.n : '—';
+  document.getElementById('class-grade').textContent = c ? 'CLASS AVG: ' + c.avg + ' (' + c.avgGrade + ')' : 'CLASS: —';
+  renderChart(c);
+  renderGrid(c);
+  renderFreq(c);
+}
+
+function renderChart(c) {
+  if (chartInst) { chartInst.destroy(); chartInst = null; }
+  if (!c) return;
+  chartInst = new Chart(document.getElementById('chartCanvas'), {
+    type: 'bar',
+    data: {
+      labels: buckets,
+      datasets: [{
+        label: 'Students',
+        data: c.bFreq,
+        backgroundColor: bucketColors,
+        borderRadius: 4,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => 'Students: ' + ctx.raw } } },
+      scales: {
+        x: { ticks: { color: '#8a8278', font: { size: 11, family: 'DM Mono' } }, grid: { display: false }, border: { color: 'rgba(255,255,255,0.06)' } },
+        y: { ticks: { stepSize: 1, color: '#8a8278', font: { size: 11, family: 'DM Mono' } }, grid: { color: 'rgba(255,255,255,0.05)' }, border: { color: 'rgba(255,255,255,0.06)' } }
+      }
+    }
+  });
+}
+
+function renderGrid(c) {
+  const grid = document.getElementById('scores-grid');
+  let list = scores;
+  if (activeFilter !== 'all') list = scores.filter(s => gradeOf(s.score) === activeFilter);
+
+  const note = document.getElementById('filter-note');
+  note.textContent = activeFilter !== 'all' ? '· Grade ' + activeFilter + ' (' + list.length + ')' : '';
+
+  if (!list.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><span class="empty-icon">🔍</span><div class="empty-txt">No scores match this filter.</div></div>';
+    return;
+  }
+  grid.innerHTML = '';
+  list.forEach((s, idx) => {
+    const realIdx = scores.indexOf(s);
+    const isMode = c && s.score === c.mode;
+    const g = gradeOf(s.score);
+    const chip = document.createElement('div');
+    chip.className = 'score-chip ' + chipClass(s.score) + (isMode ? ' is-mode' : '');
+    chip.title = (s.name || 'Score') + ': ' + s.score + (isMode ? ' ★ MODE' : '');
+    chip.innerHTML = `
+      <div class="sc-val">${s.score}</div>
+      <div class="sc-name">${s.name ? s.name.split(' ')[0] : '—'}</div>
+      <div class="sc-grade">${g}${isMode ? ' ★' : ''}</div>
+      <button class="rm-btn" onclick="removeScore(${realIdx})">✕</button>
+    `;
+    grid.appendChild(chip);
+  });
+}
+
+function renderFreq(c) {
+  const tb = document.getElementById('freq-body');
+  if (!c) { tb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:16px;">No data yet</td></tr>'; return; }
+  const maxF = Math.max(...c.bFreq, 1);
+  tb.innerHTML = buckets.map((b, i) => {
+    if (c.bFreq[i] === 0) return '';
+    const mid = i * 10 + 5;
+    const g = gradeOf(mid);
+    const gc = gradeColor(g);
+    const pct = Math.round(c.bFreq[i] / c.n * 100);
+    const barW = Math.round(c.bFreq[i] / maxF * 100);
+    const names = scores.filter(s => bucketOf(s.score) === i).map(s => s.name || s.score).join(', ');
+    return `<tr>
+      <td style="font-family:'DM Mono',monospace;">${b}</td>
+      <td><span style="font-weight:600;color:${gc};">${g}</span></td>
+      <td style="color:var(--muted);font-size:12px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${names}">${names || '—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-weight:600;">${c.bFreq[i]}</td>
+      <td><div class="bar-wrap"><div class="bar-fill" style="width:${barW}%;background:${gc};"></div></div></td>
+      <td style="font-family:'DM Mono',monospace;color:var(--muted);">${pct}%</td>
+    </tr>`;
+  }).join('');
+}
+
+function addScore() {
+  const si = document.getElementById('score-in');
+  const ni = document.getElementById('name-in');
+  const v = parseInt(si.value);
+  if (isNaN(v) || v < 0 || v > 100) {
+    si.style.boxShadow = '0 0 0 2px #e05c5c';
+    setTimeout(() => si.style.boxShadow = '', 1200);
+    showToast('Enter a score between 0 and 100');
+    return;
+  }
+  scores.push({ score: v, name: ni.value.trim() });
+  si.value = ''; ni.value = '';
+  showToast('Score ' + v + ' added (' + gradeOf(v) + ')');
+  render();
+}
+
+function removeScore(i) {
+  const s = scores[i];
+  scores.splice(i, 1);
+  showToast('Removed score ' + s.score);
+  render();
+}
+
+function clearAll() {
+  if (scores.length === 0) return;
+  scores = [];
+  showToast('All scores cleared');
+  render();
+}
+
+function setFilter(el, f) {
+  activeFilter = f;
+  document.querySelectorAll('.pill').forEach(p => {
+    p.className = 'pill';
+  });
+  const map = { all:'active-all', A:'active-a', B:'active-b', C:'active-c', D:'active-d', F:'active-f' };
+  el.classList.add(map[f]);
+  render();
+}
+
+const sampleNames = ['Alice','Cara','Dev','Eva','Sindhya','Grace','Hinata','Ivan','Jess','Karan','Siya','Marco','Nina','Omar','Priya','Veronica','Prem','Sara','Aaron'];
+function bulkAdd() {
+  sampleNames.forEach(name => {
+    const s = Math.min(100, Math.max(0, Math.round(62 + Math.random() * 38 - Math.random() * 15)));
+    scores.push({ score: s, name });
+  });
+  showToast('Added 20 sample students ⚡');
+  render();
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+document.getElementById('score-in').addEventListener('keydown', e => { if (e.key === 'Enter') addScore(); });
+
+[
+  { name: 'Noopur Ganar',   score: 92 },
+  { name: 'Priya Nair',   score: 78 },
+  { name: 'Rohan Mehta',  score: 69 },
+  { name: 'Sanvi Patil',  score: 55 },
+].forEach(s => scores.push(s));
+
+render();
+</script>
+</body>
+</html>
