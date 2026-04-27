@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shopping Cart</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(-45deg, #667eea, #764ba2, #43cea2, #185a9d);
+    background-size: 400% 400%;
+    animation: gradientMove 10s ease infinite;
+    padding: 2rem 1rem;
+  }
+  @keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .wrap {
+    max-width: 620px;
+    margin: 0 auto;
+  }
+  .hero {
+    text-align: center;
+    padding: 1.5rem 0 1.25rem;
+    color: white;
+  }
+  .hero-icon { font-size: 52px; display: block; margin-bottom: 8px; }
+  .hero h1 { font-size: 28px; font-weight: 600; }
+  .hero p { font-size: 14px; opacity: 0.85; margin-top: 4px; }
+
+  .form-card {
+    background: rgba(255,255,255,0.18);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 18px;
+    padding: 1.4rem;
+    margin-bottom: 1.25rem;
+  }
+  .form-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 12px;
+  }
+  .fields {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .field-wrap { display: flex; flex-direction: column; gap: 4px; }
+  .field-label { font-size: 11px; color: rgba(255,255,255,0.65); }
+  input {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 10px;
+    color: white;
+    outline: none;
+    transition: border 0.2s, background 0.2s;
+  }
+  input::placeholder { color: rgba(255,255,255,0.5); }
+  input:focus {
+    background: rgba(255,255,255,0.28);
+    border-color: rgba(255,255,255,0.7);
+  }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn:hover { transform: scale(1.05); box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: linear-gradient(135deg, #ff7e5f, #feb47b); color: white; }
+  .btn-danger  { background: rgba(255,80,80,0.25); color: #ffd0d0; border: 1px solid rgba(255,100,100,0.4); }
+  .btn-clear   { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 1.25rem;
+  }
+  .stat {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 14px;
+    padding: 14px;
+    text-align: center;
+    color: white;
+  }
+  .stat-label { font-size: 11px; opacity: 0.7; margin-bottom: 4px; }
+  .stat-val { font-size: 20px; font-weight: 700; }
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 10px;
+  }
+
+  .item-card {
+    background: rgba(255,255,255,0.18);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.28);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: white;
+    animation: fadeIn 0.22s ease;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .item-card:hover {
+    background: rgba(255,255,255,0.26);
+    transform: translateY(-2px);
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .item-emoji {
+    font-size: 26px;
+    width: 48px;
+    height: 48px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .item-info { flex: 1; min-width: 0; }
+  .item-name { font-size: 15px; font-weight: 600; }
+  .item-meta { font-size: 12px; opacity: 0.65; margin-top: 2px; }
+  .item-price { font-size: 17px; font-weight: 700; color: #ffdd88; flex-shrink: 0; }
+  .item-remove {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: rgba(255,255,255,0.45);
+    padding: 4px 6px;
+    border-radius: 8px;
+    transition: color 0.15s, background 0.15s;
+    line-height: 1;
+  }
+  .item-remove:hover { color: #ff8080; background: rgba(255,80,80,0.2); }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: rgba(255,255,255,0.7);
+  }
+  .empty-icon { font-size: 52px; display: block; margin-bottom: 12px; }
+
+  .total-bar {
+    background: rgba(255,255,255,0.22);
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 14px;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 14px;
+    color: white;
+  }
+  .total-label { font-size: 15px; font-weight: 600; }
+  .total-amount { font-size: 24px; font-weight: 700; color: #ffdd88; }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: rgba(30,20,60,0.92);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 12px;
+    padding: 12px 18px;
+    font-size: 13px;
+    color: white;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.25s;
+    pointer-events: none;
+    z-index: 999;
+    backdrop-filter: blur(10px);
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="hero">
+    <span class="hero-icon">🛍️</span>
+    <h1>My Shopping Cart</h1>
+    <p>Add items and track your spend in real time</p>
+  </div>
+
+  <div class="form-card">
+    <div class="form-title">Add new item</div>
+    <div class="fields">
+      <div class="field-wrap">
+        <span class="field-label">Item ID</span>
+        <input type="number" id="inp-id" placeholder="e.g. 101">
+      </div>
+      <div class="field-wrap">
+        <span class="field-label">Item name</span>
+        <input type="text" id="inp-name" placeholder="e.g. Wireless Headphones">
+      </div>
+      <div class="field-wrap">
+        <span class="field-label">Price (₹)</span>
+        <input type="number" id="inp-price" placeholder="e.g. 999">
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary" onclick="addItem()">＋ Add to cart</button>
+      <button class="btn btn-danger"  onclick="removeItem()">🗑 Remove by ID</button>
+      <button class="btn btn-clear"   onclick="clearCart()">✕ Clear all</button>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat"><div class="stat-label">Items</div><div class="stat-val" id="stat-count">0</div></div>
+    <div class="stat"><div class="stat-label">Total</div><div class="stat-val" id="stat-total">₹0</div></div>
+    <div class="stat"><div class="stat-label">Avg price</div><div class="stat-val" id="stat-avg">—</div></div>
+  </div>
+
+  <div id="cart-area">
+    <div class="empty-state">
+      <span class="empty-icon">🧺</span>
+      <div style="font-size:16px;font-weight:600;color:white;margin-bottom:6px;">Your cart is empty</div>
+      <div style="font-size:13px;">Add your first item above to get started</div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const EMOJI_MAP = {
+    phone: '📱', laptop: '💻', headphone: '🎧', earphone: '🎧',
+    book: '📚', shirt: '👕', shoe: '👟', watch: '⌚', bag: '👜',
+    food: '🍱', rice: '🍚', water: '💧', juice: '🧃', snack: '🍿',
+    camera: '📷', tablet: '📟', charger: '🔌', cable: '🔌',
+    pen: '🖊️', notebook: '📓', toy: '🧸', game: '🎮', cycle: '🚲',
+    chair: '🪑', lamp: '💡', tv: '📺', fridge: '❄️', fan: '💨',
+    soap: '🧴', lotion: '🧴', coffee: '☕', tea: '🍵',
+    biscuit: '🍪', bread: '🍞', milk: '🥛', chocolate: '🍫',
+    chips: '🍟', dress: '👗', cap: '🧢', glasses: '👓'
+  };
+
+  function getEmoji(name) {
+    const lower = name.toLowerCase();
+    for (const [kw, em] of Object.entries(EMOJI_MAP)) {
+      if (lower.includes(kw)) return em;
+    }
+    return '📦';
+  }
+
+  let cart = [];
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2400);
+  }
+
+  function updateStats() {
+    const count = cart.length;
+    const total = cart.reduce((s, i) => s + i.price, 0);
+    document.getElementById('stat-count').textContent = count;
+    document.getElementById('stat-total').textContent = '₹' + total.toLocaleString('en-IN');
+    document.getElementById('stat-avg').textContent = count
+      ? '₹' + Math.round(total / count).toLocaleString('en-IN') : '—';
+  }
+
+  function renderCart() {
+    const area = document.getElementById('cart-area');
+    if (cart.length === 0) {
+      area.innerHTML = `
+        <div class="empty-state">
+          <span class="empty-icon">🧺</span>
+          <div style="font-size:16px;font-weight:600;color:white;margin-bottom:6px;">Your cart is empty</div>
+          <div style="font-size:13px;">Add your first item above to get started</div>
+        </div>`;
+      return;
+    }
+    const total = cart.reduce((s, i) => s + i.price, 0);
+    let html = `<div class="section-title">${cart.length} item${cart.length !== 1 ? 's' : ''} in your cart</div>`;
+    for (const item of cart) {
+      html += `
+        <div class="item-card">
+          <div class="item-emoji">${getEmoji(item.name)}</div>
+          <div class="item-info">
+            <div class="item-name">${item.name}</div>
+            <div class="item-meta">ID: ${item.id}</div>
+          </div>
+          <div class="item-price">₹${item.price.toLocaleString('en-IN')}</div>
+          <button class="item-remove" onclick="removeById(${item.id})" title="Remove">✕</button>
+        </div>`;
+    }
+    html += `
+      <div class="total-bar">
+        <span class="total-label">🧾 Order total</span>
+        <span class="total-amount">₹${total.toLocaleString('en-IN')}</span>
+      </div>`;
+    area.innerHTML = html;
+  }
+
+  function addItem() {
+    const id    = parseInt(document.getElementById('inp-id').value);
+    const name  = document.getElementById('inp-name').value.trim();
+    const price = parseFloat(document.getElementById('inp-price').value);
+    if (!id || !name || isNaN(price) || price < 0) {
+      showToast('⚠️ Please fill all fields correctly'); return;
+    }
+    if (cart.find(i => i.id === id)) {
+      showToast('⚠️ An item with this ID already exists'); return;
+    }
+    cart.push({ id, name, price });
+    showToast('✅ ' + name + ' added to cart!');
+    ['inp-id','inp-name','inp-price'].forEach(id => document.getElementById(id).value = '');
+    updateStats(); renderCart();
+  }
+
+  function removeItem() {
+    const id = parseInt(document.getElementById('inp-id').value);
+    if (!id) { showToast('⚠️ Enter an ID to remove'); return; }
+    removeById(id);
+  }
+
+  function removeById(id) {
+    const idx = cart.findIndex(i => i.id === id);
+    if (idx !== -1) {
+      const name = cart[idx].name;
+      cart.splice(idx, 1);
+      showToast('🗑 ' + name + ' removed');
+    } else {
+      showToast('❌ Item with ID ' + id + ' not found');
+    }
+    updateStats(); renderCart();
+  }
+
+  function clearCart() {
+    if (cart.length === 0) { showToast('Cart is already empty'); return; }
+    cart = [];
+    showToast('🧹 Cart cleared');
+    updateStats(); renderCart();
+  }
+</script>
+</body>
+</html>
