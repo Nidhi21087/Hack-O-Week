@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Grand Library</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Crimson+Pro:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Crimson Pro', Georgia, serif;
+  min-height: 100vh;
+  background: #1a0e05;
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(101,57,14,0.4) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(80,40,10,0.3) 0%, transparent 50%),
+    repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(0,0,0,0.08) 60px, rgba(0,0,0,0.08) 61px),
+    repeating-linear-gradient(0deg,  transparent, transparent 60px, rgba(0,0,0,0.06) 60px, rgba(0,0,0,0.06) 61px);
+  padding: 2rem 1rem 4rem;
+  color: #f5e6c8;
+}
+
+/* ── HEADER ── */
+.header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+.header-ornament { font-size: 11px; letter-spacing: 8px; color: #c9a84c; text-transform: uppercase; margin-bottom: 6px; }
+.header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(32px, 5vw, 52px);
+  font-weight: 700;
+  color: #f5e6c8;
+  text-shadow: 0 2px 20px rgba(201,168,76,0.4);
+  line-height: 1.1;
+}
+.header h1 span { color: #c9a84c; font-style: italic; }
+.header-sub { font-size: 14px; color: #a08060; letter-spacing: 3px; text-transform: uppercase; margin-top: 6px; }
+.divider {
+  display: flex; align-items: center; gap: 12px;
+  max-width: 500px; margin: 16px auto 0;
+  color: #c9a84c;
+}
+.divider-line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, #c9a84c, transparent); }
+.divider-gem { font-size: 14px; }
+
+/* ── LAYOUT ── */
+.layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+  align-items: start;
+}
+
+/* ── PANEL (card) ── */
+.panel {
+  background: linear-gradient(160deg, #2e1c0a 0%, #1f1208 100%);
+  border: 1px solid #5a3a18;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(201,168,76,0.15);
+}
+.panel-header {
+  background: linear-gradient(90deg, #3d2410, #2a1a08, #3d2410);
+  padding: 14px 20px;
+  border-bottom: 1px solid #5a3a18;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.panel-header-icon { font-size: 18px; }
+.panel-header-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #c9a84c;
+  letter-spacing: 1px;
+}
+.panel-body { padding: 20px; }
+
+/* ── FORM INPUTS ── */
+.field { margin-bottom: 14px; }
+.field label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #a08060;
+  margin-bottom: 5px;
+}
+.field input {
+  width: 100%;
+  padding: 10px 14px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid #4a2e12;
+  border-radius: 7px;
+  color: #f5e6c8;
+  font-family: 'Crimson Pro', serif;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.field input:focus {
+  border-color: #c9a84c;
+  box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
+}
+.field input::placeholder { color: #5a4020; }
+
+/* ── GENRE SELECT ── */
+.genre-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.genre-chip {
+  padding: 5px 11px;
+  border-radius: 20px;
+  border: 1px solid #4a2e12;
+  background: transparent;
+  color: #a08060;
+  font-family: 'Crimson Pro', serif;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.genre-chip:hover { border-color: #c9a84c; color: #c9a84c; }
+.genre-chip.active { background: #c9a84c; border-color: #c9a84c; color: #1a0e05; font-weight: 600; }
+
+/* ── RATING ── */
+.rating-row { display: flex; gap: 5px; margin-bottom: 14px; }
+.star {
+  font-size: 22px;
+  cursor: pointer;
+  color: #3a2510;
+  transition: color 0.15s, transform 0.15s;
+  line-height: 1;
+}
+.star:hover, .star.on { color: #c9a84c; }
+.star:hover { transform: scale(1.2); }
+
+/* ── BUTTONS ── */
+.btn {
+  width: 100%;
+  padding: 11px;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Crimson Pro', serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-add {
+  background: linear-gradient(135deg, #c9a84c, #a07030);
+  color: #1a0e05;
+  box-shadow: 0 4px 16px rgba(201,168,76,0.25);
+}
+.btn-add:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201,168,76,0.35); }
+.btn-secondary {
+  background: transparent;
+  border: 1px solid #4a2e12;
+  color: #a08060;
+}
+.btn-secondary:hover { border-color: #c9a84c; color: #c9a84c; background: rgba(201,168,76,0.05); }
+.btn-danger {
+  background: rgba(180,60,40,0.15);
+  border: 1px solid rgba(180,60,40,0.4);
+  color: #e08060;
+}
+.btn-danger:hover { background: rgba(180,60,40,0.25); }
+
+/* ── SEARCH BAR ── */
+.search-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.search-bar input {
+  flex: 1;
+  padding: 10px 14px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid #4a2e12;
+  border-radius: 8px;
+  color: #f5e6c8;
+  font-family: 'Crimson Pro', serif;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.search-bar input:focus { border-color: #c9a84c; }
+.search-bar input::placeholder { color: #5a4020; }
+.search-btn {
+  padding: 10px 14px;
+  background: rgba(201,168,76,0.1);
+  border: 1px solid rgba(201,168,76,0.3);
+  border-radius: 8px;
+  color: #c9a84c;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+.search-btn:hover { background: rgba(201,168,76,0.2); }
+
+/* ── FILTER TABS ── */
+.filter-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+.tab {
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid #4a2e12;
+  background: transparent;
+  color: #a08060;
+  font-family: 'Crimson Pro', serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.tab:hover { border-color: #c9a84c; color: #c9a84c; }
+.tab.active { background: rgba(201,168,76,0.12); border-color: #c9a84c; color: #c9a84c; }
+
+/* ── SORT ROW ── */
+.sort-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: #6a4a28;
+}
+.sort-select {
+  background: transparent;
+  border: 1px solid #4a2e12;
+  border-radius: 6px;
+  color: #a08060;
+  padding: 4px 8px;
+  font-family: 'Crimson Pro', serif;
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+}
+.sort-select option { background: #1f1208; }
+
+/* ── BOOK CARDS ── */
+.book-list { display: flex; flex-direction: column; gap: 10px; }
+
+.book-card {
+  background: linear-gradient(135deg, #2a1a08, #1e1206);
+  border: 1px solid #4a2e12;
+  border-left: 4px solid var(--spine-color, #c9a84c);
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  transition: all 0.2s;
+  animation: slideIn 0.25s ease both;
+  position: relative;
+  overflow: hidden;
+}
+.book-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201,168,76,0.2), transparent);
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.book-card:hover { border-color: #7a5a28; border-left-color: var(--spine-color, #c9a84c); transform: translateX(4px); background: linear-gradient(135deg, #331f0a, #241508); }
+
+.book-cover {
+  width: 48px;
+  height: 64px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  background: var(--cover-bg, #3a2410);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+}
+
+.book-info { flex: 1; min-width: 0; }
+.book-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #f5e6c8;
+  line-height: 1.2;
+  margin-bottom: 3px;
+}
+.book-author { font-size: 13px; color: #a08060; font-style: italic; margin-bottom: 5px; }
+.book-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.book-genre {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 10px;
+  border: 1px solid currentColor;
+  opacity: 0.85;
+}
+.book-stars { color: #c9a84c; font-size: 12px; letter-spacing: 1px; }
+.book-num {
+  position: absolute;
+  top: 12px; right: 14px;
+  font-size: 11px;
+  color: #4a3010;
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+}
+.book-del {
+  position: absolute;
+  bottom: 10px; right: 12px;
+  background: none;
+  border: none;
+  color: #4a2e12;
+  cursor: pointer;
+  font-size: 15px;
+  transition: color 0.2s;
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+.book-del:hover { color: #e08060; background: rgba(180,60,40,0.1); }
+
+/* ── STATS BAR ── */
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.stat {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid #3a2410;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+}
+.stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #c9a84c;
+}
+.stat-lbl { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #6a4a28; margin-top: 2px; }
+
+/* ── EMPTY STATE ── */
+.empty {
+  text-align: center;
+  padding: 50px 20px;
+  color: #5a3a18;
+}
+.empty-icon { font-size: 48px; margin-bottom: 14px; display: block; opacity: 0.5; }
+.empty-txt { font-family: 'Playfair Display', serif; font-size: 18px; font-style: italic; }
+.empty-sub { font-size: 13px; margin-top: 6px; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 28px; left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  background: #2a1a08;
+  border: 1px solid #c9a84c;
+  color: #c9a84c;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-size: 13px;
+  letter-spacing: 1px;
+  opacity: 0;
+  transition: all 0.3s;
+  pointer-events: none;
+  z-index: 9999;
+  white-space: nowrap;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.err  { border-color: #e08060; color: #e08060; }
+
+/* ── CAPACITY BAR ── */
+.capacity-wrap { margin-top: 14px; }
+.capacity-label { font-size: 11px; letter-spacing: 1px; color: #6a4a28; margin-bottom: 5px; display: flex; justify-content: space-between; }
+.capacity-track {
+  height: 6px;
+  background: rgba(0,0,0,0.4);
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid #3a2410;
+}
+.capacity-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #c9a84c, #e8c870);
+  transition: width 0.4s ease;
+}
+
+@media (max-width: 720px) {
+  .layout { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-ornament">Est. MMXXIV</div>
+  <h1>The <span>Grand</span> Library</h1>
+  <div class="header-sub">Personal Book Catalogue</div>
+  <div class="divider">
+    <div class="divider-line"></div>
+    <div class="divider-gem">✦</div>
+    <div class="divider-line"></div>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- LEFT: ADD BOOK PANEL -->
+  <div>
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="panel-header">
+        <span class="panel-header-icon">✒️</span>
+        <span class="panel-header-title">Add to Collection</span>
+      </div>
+      <div class="panel-body">
+        <div class="field">
+          <label>Book Title</label>
+          <input type="text" id="inp-title" placeholder="Enter title...">
+        </div>
+        <div class="field">
+          <label>Author</label>
+          <input type="text" id="inp-author" placeholder="Enter author...">
+        </div>
+        <div class="field">
+          <label>Genre</label>
+          <div class="genre-row" id="genre-row">
+            <button class="genre-chip" onclick="pickGenre(this,'Fiction')">Fiction</button>
+            <button class="genre-chip" onclick="pickGenre(this,'Mystery')">Mystery</button>
+            <button class="genre-chip" onclick="pickGenre(this,'Sci-Fi')">Sci-Fi</button>
+            <button class="genre-chip" onclick="pickGenre(this,'Fantasy')">Fantasy</button>
+            <button class="genre-chip" onclick="pickGenre(this,'History')">History</button>
+            <button class="genre-chip" onclick="pickGenre(this,'Science')">Science</button>
+            <button class="genre-chip" onclick="pickGenre(this,'Romance')">Romance</button>
+            <button class="genre-chip" onclick="pickGenre(this,'Biography')">Biography</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Your Rating</label>
+          <div class="rating-row" id="rating-row">
+            <span class="star" onclick="setRating(1)">★</span>
+            <span class="star" onclick="setRating(2)">★</span>
+            <span class="star" onclick="setRating(3)">★</span>
+            <span class="star" onclick="setRating(4)">★</span>
+            <span class="star" onclick="setRating(5)">★</span>
+          </div>
+        </div>
+        <button class="btn btn-add" onclick="addBook()">📖 Add to Library</button>
+
+        <div class="capacity-wrap">
+          <div class="capacity-label">
+            <span>Shelf Capacity</span>
+            <span id="cap-txt">0 / 20</span>
+          </div>
+          <div class="capacity-track">
+            <div class="capacity-fill" id="cap-fill" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-header-icon">📊</span>
+        <span class="panel-header-title">Library Stats</span>
+      </div>
+      <div class="panel-body">
+        <div class="stats-bar">
+          <div class="stat"><div class="stat-num" id="st-total">0</div><div class="stat-lbl">Books</div></div>
+          <div class="stat"><div class="stat-num" id="st-genres">0</div><div class="stat-lbl">Genres</div></div>
+          <div class="stat"><div class="stat-num" id="st-avg">—</div><div class="stat-lbl">Avg ★</div></div>
+        </div>
+        <div style="font-size:12px;color:#5a3a18;line-height:1.8;" id="top-genre-row"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: CATALOGUE -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-header-icon">📚</span>
+      <span class="panel-header-title">Catalogue</span>
+    </div>
+    <div class="panel-body">
+      <div class="search-bar">
+        <input type="text" id="inp-search" placeholder="Search by title or author..." oninput="renderBooks()">
+        <button class="search-btn" onclick="renderBooks()">🔍</button>
+      </div>
+      <div class="filter-tabs" id="filter-tabs">
+        <button class="tab active" onclick="setFilter('All', this)">All</button>
+        <button class="tab" onclick="setFilter('Fiction', this)">Fiction</button>
+        <button class="tab" onclick="setFilter('Mystery', this)">Mystery</button>
+        <button class="tab" onclick="setFilter('Sci-Fi', this)">Sci-Fi</button>
+        <button class="tab" onclick="setFilter('Fantasy', this)">Fantasy</button>
+        <button class="tab" onclick="setFilter('History', this)">History</button>
+        <button class="tab" onclick="setFilter('Science', this)">Science</button>
+        <button class="tab" onclick="setFilter('Romance', this)">Romance</button>
+        <button class="tab" onclick="setFilter('Biography', this)">Biography</button>
+      </div>
+      <div class="sort-row">
+        <span id="result-count">0 books</span>
+        <select class="sort-select" onchange="renderBooks()" id="sort-sel">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="title">Title A–Z</option>
+          <option value="author">Author A–Z</option>
+          <option value="rating">Highest rated</option>
+        </select>
+      </div>
+      <div class="book-list" id="book-list"></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const MAX = 20;
+let books = [];
+let selectedGenre = '';
+let selectedRating = 0;
+let currentFilter = 'All';
+
+const GENRE_COLORS = {
+  'Fiction':   { spine: '#7b9edb', cover: '#1a2a4a', text: '#7b9edb' },
+  'Mystery':   { spine: '#c87850', cover: '#3a1a08', text: '#c87850' },
+  'Sci-Fi':    { spine: '#50c8c8', cover: '#0a2a2a', text: '#50c8c8' },
+  'Fantasy':   { spine: '#a87bdb', cover: '#2a1a3a', text: '#a87bdb' },
+  'History':   { spine: '#c8a850', cover: '#2a1e08', text: '#c8a850' },
+  'Science':   { spine: '#70c870', cover: '#0a2a0a', text: '#70c870' },
+  'Romance':   { spine: '#db7b9e', cover: '#3a0a1e', text: '#db7b9e' },
+  'Biography': { spine: '#c8c850', cover: '#2a2a08', text: '#c8c850' },
+  'default':   { spine: '#c9a84c', cover: '#2a1a08', text: '#c9a84c' },
+};
+
+const GENRE_ICONS = {
+  'Fiction':'📖','Mystery':'🔍','Sci-Fi':'🚀','Fantasy':'🧙','History':'🏛️',
+  'Science':'🔬','Romance':'🌹','Biography':'👤','default':'📚'
+};
+
+function toast(msg, err) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (err ? ' err' : '');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function pickGenre(btn, genre) {
+  document.querySelectorAll('.genre-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedGenre = genre;
+}
+
+function setRating(n) {
+  selectedRating = n;
+  document.querySelectorAll('.star').forEach((s, i) => s.classList.toggle('on', i < n));
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderBooks();
+}
+
+function addBook() {
+  const title  = document.getElementById('inp-title').value.trim();
+  const author = document.getElementById('inp-author').value.trim();
+  if (!title || !author) { toast('Please enter both title and author.', true); return; }
+  if (books.length >= MAX) { toast('The shelf is full! Remove a book first.', true); return; }
+  if (books.find(b => b.title.toLowerCase() === title.toLowerCase())) { toast('This book is already in the catalogue.', true); return; }
+  books.push({ title, author, genre: selectedGenre || 'default', rating: selectedRating, id: Date.now() });
+  toast('✦ "' + title + '" added to the library');
+  document.getElementById('inp-title').value = '';
+  document.getElementById('inp-author').value = '';
+  document.querySelectorAll('.genre-chip').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.star').forEach(s => s.classList.remove('on'));
+  selectedGenre = ''; selectedRating = 0;
+  renderBooks(); updateStats();
+}
+
+function removeBook(id) {
+  const b = books.find(x => x.id === id);
+  books = books.filter(x => x.id !== id);
+  toast('✦ "' + (b ? b.title : 'Book') + '" removed');
+  renderBooks(); updateStats();
+}
+
+function renderBooks() {
+  const q = document.getElementById('inp-search').value.trim().toLowerCase();
+  const sort = document.getElementById('sort-sel').value;
+  let list = [...books];
+
+  if (currentFilter !== 'All') list = list.filter(b => b.genre === currentFilter);
+  if (q) list = list.filter(b => b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q));
+
+  if (sort === 'newest') list.reverse();
+  else if (sort === 'title') list.sort((a,b) => a.title.localeCompare(b.title));
+  else if (sort === 'author') list.sort((a,b) => a.author.localeCompare(b.author));
+  else if (sort === 'rating') list.sort((a,b) => b.rating - a.rating);
+
+  const container = document.getElementById('book-list');
+  document.getElementById('result-count').textContent = list.length + ' book' + (list.length!==1?'s':'');
+
+  if (list.length === 0) {
+    container.innerHTML = `
+      <div class="empty">
+        <span class="empty-icon">🕯️</span>
+        <div class="empty-txt">${books.length === 0 ? 'The shelves await their first tome' : 'No books match your search'}</div>
+        <div class="empty-sub">${books.length === 0 ? 'Add a book using the panel on the left' : 'Try a different search or filter'}</div>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = '';
+  list.forEach((book, i) => {
+    const gc = GENRE_COLORS[book.genre] || GENRE_COLORS.default;
+    const gi = GENRE_ICONS[book.genre] || GENRE_ICONS.default;
+    const stars = '★'.repeat(book.rating) + '☆'.repeat(5 - book.rating);
+    const card = document.createElement('div');
+    card.className = 'book-card';
+    card.style.setProperty('--spine-color', gc.spine);
+    card.style.animationDelay = (i * 40) + 'ms';
+    card.innerHTML = `
+      <div class="book-cover" style="--cover-bg:${gc.cover};background:${gc.cover};">${gi}</div>
+      <div class="book-info">
+        <div class="book-title">${book.title}</div>
+        <div class="book-author">by ${book.author}</div>
+        <div class="book-meta">
+          ${book.genre !== 'default' ? `<span class="book-genre" style="color:${gc.text};border-color:${gc.text};">${book.genre}</span>` : ''}
+          ${book.rating ? `<span class="book-stars">${stars}</span>` : ''}
+        </div>
+      </div>
+      <div class="book-num">#${books.indexOf(book)+1}</div>
+      <button class="book-del" onclick="removeBook(${book.id})" title="Remove">✕</button>`;
+    container.appendChild(card);
+  });
+}
+
+function updateStats() {
+  const total = books.length;
+  const genres = new Set(books.map(b => b.genre).filter(g => g !== 'default')).size;
+  const rated = books.filter(b => b.rating > 0);
+  const avg = rated.length ? (rated.reduce((s,b) => s+b.rating, 0) / rated.length).toFixed(1) : '—';
+  document.getElementById('st-total').textContent = total;
+  document.getElementById('st-genres').textContent = genres;
+  document.getElementById('st-avg').textContent = avg;
+  document.getElementById('cap-txt').textContent = total + ' / ' + MAX;
+  document.getElementById('cap-fill').style.width = (total/MAX*100) + '%';
+
+  // Top genre
+  const genreCounts = {};
+  books.forEach(b => { if(b.genre!=='default') genreCounts[b.genre] = (genreCounts[b.genre]||0)+1; });
+  const top = Object.entries(genreCounts).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  document.getElementById('top-genre-row').innerHTML = top.length
+    ? top.map(([g,c]) => `<span style="color:${(GENRE_COLORS[g]||GENRE_COLORS.default).text};">${GENRE_ICONS[g]} ${g}: ${c}</span>`).join('&emsp;')
+    : '';
+}
+
+// seed data
+[
+  { title:'The Name of the Wind', author:'Patrick Rothfuss', genre:'Fantasy', rating:5 },
+  { title:'Dune', author:'Frank Herbert', genre:'Sci-Fi', rating:5 },
+  { title:'Gone Girl', author:'Gillian Flynn', genre:'Mystery', rating:4 },
+  { title:'Sapiens', author:'Yuval Noah Harari', genre:'History', rating:5 },
+  { title:'Pride and Prejudice', author:'Jane Austen', genre:'Romance', rating:4 },
+].forEach((b,i) => books.push({...b, id: i+1}));
+
+renderBooks(); updateStats();
+</script>
+</body>
+</html>
