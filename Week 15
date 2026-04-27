@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Contact Book Search</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=JetBrains+Mono:wght@400;500&family=Mulish:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#f7f4ef;
+  --surface:#ffffff;
+  --surface2:#f0ece4;
+  --ink:#1a1714;
+  --ink2:#4a4540;
+  --muted:#9a9088;
+  --teal:#0d7a6e;
+  --teal-light:#e0f2ef;
+  --teal-mid:#5bb8ac;
+  --amber:#c47c1a;
+  --amber-light:#fdf3e0;
+  --red:#c0392b;
+  --red-light:#fdecea;
+  --border:#e0dbd2;
+  --shadow:0 2px 12px rgba(0,0,0,0.07);
+}
+body{font-family:'Mulish',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding:0 0 4rem;}
+
+/* paper texture lines */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:repeating-linear-gradient(transparent,transparent 31px,rgba(0,0,0,0.04) 31px,rgba(0,0,0,0.04) 32px);
+  background-size:100% 32px;
+}
+
+.page{position:relative;z-index:1;max-width:880px;margin:0 auto;padding:2.5rem 1.5rem;}
+
+/* header */
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:2px solid var(--ink);}
+.header-left{}
+.header-left h1{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;color:var(--ink);letter-spacing:-0.5px;}
+.header-left p{font-size:13px;color:var(--muted);margin-top:4px;font-family:'JetBrains Mono',monospace;}
+.header-badge{
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  padding:6px 14px;border:1.5px solid var(--ink);border-radius:2px;
+  color:var(--ink);background:transparent;letter-spacing:1px;
+  font-weight:500;
+}
+
+/* search box */
+.search-section{
+  background:var(--surface);border:1.5px solid var(--ink);
+  border-radius:4px;padding:1.4rem 1.6rem;margin-bottom:1.5rem;
+  box-shadow:4px 4px 0 var(--ink);
+}
+.search-title{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;}
+.search-row{display:flex;gap:10px;flex-wrap:wrap;}
+.search-input-wrap{flex:1;min-width:200px;position:relative;}
+.search-input-wrap input{
+  width:100%;padding:11px 14px 11px 40px;
+  font-size:14px;font-family:'Mulish',sans-serif;
+  border:1.5px solid var(--border);border-radius:4px;
+  background:var(--bg);color:var(--ink);outline:none;
+  transition:border-color 0.2s,box-shadow 0.2s;
+}
+.search-input-wrap input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,122,110,0.12);}
+.search-input-wrap input::placeholder{color:var(--muted);}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;}
+.btn{
+  padding:11px 20px;font-size:13px;font-weight:700;font-family:'Mulish',sans-serif;
+  border-radius:4px;border:1.5px solid var(--border);cursor:pointer;
+  background:var(--surface);color:var(--ink);transition:all 0.15s;
+  letter-spacing:0.3px;white-space:nowrap;
+}
+.btn:hover{border-color:var(--ink);background:var(--surface2);}
+.btn:active{transform:scale(0.97);}
+.btn.primary{background:var(--teal);color:#fff;border-color:var(--teal);box-shadow:3px 3px 0 var(--teal-mid);}
+.btn.primary:hover{background:#0a6659;box-shadow:2px 2px 0 var(--teal-mid);}
+.btn.amber{background:var(--amber-light);color:var(--amber);border-color:var(--amber);}
+.btn.amber:hover{background:#fde8b8;}
+.btn.danger{background:var(--red-light);color:var(--red);border-color:var(--red);}
+.btn.danger:hover{background:#fcd4d0;}
+
+/* binary search visualizer */
+.bsearch-box{
+  background:var(--surface);border:1.5px solid var(--teal);border-radius:4px;
+  padding:1.2rem 1.4rem;margin-bottom:1.5rem;
+  display:none;
+}
+.bsearch-box.visible{display:block;animation:fadeSlide 0.3s ease;}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+.bsearch-title{font-size:11px;font-family:'JetBrains Mono',monospace;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px;color:var(--teal);font-weight:500;}
+.bsearch-steps{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+.bstep{
+  display:flex;align-items:center;gap:10px;padding:8px 12px;
+  border-radius:4px;border:1px solid var(--border);
+  background:var(--bg);font-size:13px;font-family:'JetBrains Mono',monospace;
+  animation:stepIn 0.25s ease;
+}
+@keyframes stepIn{from{opacity:0;transform:translateX(-8px);}to{opacity:1;transform:translateX(0);}}
+.bstep-num{
+  width:22px;height:22px;border-radius:50%;
+  background:var(--ink);color:#fff;font-size:11px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  font-family:'JetBrains Mono',monospace;
+}
+.bstep.found{border-color:var(--teal);background:var(--teal-light);}
+.bstep.found .bstep-num{background:var(--teal);}
+.bstep.notfound{border-color:var(--red);background:var(--red-light);}
+.bstep.notfound .bstep-num{background:var(--red);}
+.bstep-text{color:var(--ink2);flex:1;}
+.bstep-range{color:var(--muted);font-size:11px;}
+.bsearch-result{
+  padding:10px 14px;border-radius:4px;font-size:13px;font-weight:600;
+  font-family:'JetBrains Mono',monospace;border:1.5px solid;
+}
+.bsearch-result.found{background:var(--teal-light);color:var(--teal);border-color:var(--teal);}
+.bsearch-result.notfound{background:var(--red-light);color:var(--red);border-color:var(--red);}
+
+/* add contact */
+.add-section{
+  background:var(--surface);border:1.5px solid var(--border);
+  border-radius:4px;padding:1.2rem 1.4rem;margin-bottom:1.5rem;
+}
+.add-row{display:flex;gap:8px;flex-wrap:wrap;}
+.add-row input{
+  flex:1;min-width:130px;padding:10px 14px;
+  font-size:13px;font-family:'Mulish',sans-serif;
+  border:1.5px solid var(--border);border-radius:4px;
+  background:var(--bg);color:var(--ink);outline:none;
+  transition:border-color 0.2s,box-shadow 0.2s;
+}
+.add-row input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,122,110,0.1);}
+.add-row input::placeholder{color:var(--muted);}
+
+/* stats row */
+.stats-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:1.5rem;}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:14px 12px;}
+.stat-val{font-size:24px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--teal);}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:3px;letter-spacing:0.5px;text-transform:uppercase;}
+
+/* contact list */
+.list-section{background:var(--surface);border:1.5px solid var(--border);border-radius:4px;overflow:hidden;}
+.list-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;background:var(--ink);color:#fff;
+}
+.list-header-title{font-size:12px;font-family:'JetBrains Mono',monospace;letter-spacing:1.5px;text-transform:uppercase;}
+.list-header-count{font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--teal-mid);}
+
+.alpha-group{border-bottom:1px solid var(--border);}
+.alpha-group:last-child{border-bottom:none;}
+.alpha-letter{
+  padding:6px 16px;background:var(--surface2);
+  font-size:12px;font-family:'JetBrains Mono',monospace;font-weight:600;
+  color:var(--teal);letter-spacing:2px;border-bottom:1px solid var(--border);
+}
+.contact-row{
+  display:flex;align-items:center;gap:14px;padding:13px 16px;
+  border-bottom:1px solid var(--border);transition:background 0.15s;
+  animation:rowIn 0.2s ease;
+}
+@keyframes rowIn{from{opacity:0;}to{opacity:1;}}
+.contact-row:last-child{border-bottom:none;}
+.contact-row:hover{background:var(--bg);}
+.contact-row.highlight{background:var(--teal-light);border-left:3px solid var(--teal);}
+.contact-avatar{
+  width:38px;height:38px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:700;font-family:'Mulish',sans-serif;
+  border:1.5px solid var(--border);
+}
+.contact-info{flex:1;min-width:0;}
+.contact-name{font-size:14px;font-weight:700;color:var(--ink);}
+.contact-phone{font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-top:1px;}
+.contact-email{font-size:12px;color:var(--muted);margin-top:1px;}
+.contact-idx{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted);flex-shrink:0;}
+.del-btn{
+  font-size:12px;color:var(--muted);cursor:pointer;padding:5px 8px;
+  border-radius:4px;border:none;background:transparent;transition:all 0.15s;flex-shrink:0;
+}
+.del-btn:hover{background:var(--red-light);color:var(--red);}
+
+.empty-state{
+  padding:3rem;text-align:center;border-top:1px solid var(--border);
+}
+.empty-icon{font-size:36px;display:block;margin-bottom:10px;opacity:0.25;}
+.empty-txt{font-size:14px;color:var(--muted);}
+
+/* toast */
+.toast{
+  position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(70px);
+  background:var(--ink);border-radius:4px;padding:10px 22px;font-size:13px;
+  color:#fff;z-index:100;transition:transform 0.3s ease;
+  pointer-events:none;white-space:nowrap;font-family:'JetBrains Mono',monospace;
+}
+.toast.show{transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="header">
+    <div class="header-left">
+      <h1>Contact Book</h1>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="search-section">
+    <div class="search-title">Search</div>
+    <div class="search-row">
+      <div class="search-input-wrap">
+        <span class="search-icon">🔍</span>
+        <input id="search-in" placeholder="Type a name to search contact..." oninput="liveSearch()"/>
+      </div>
+      <button class="btn primary" onclick="doSearch()">Search</button>
+      <button class="btn" onclick="clearSearch()">Clear</button>
+    </div>
+  </div>
+
+  <!-- Binary Search Visualizer -->
+  <div class="bsearch-box" id="bsearch-box">
+    <div class="bsearch-title">Binary Search Steps</div>
+    <div class="bsearch-steps" id="bsearch-steps"></div>
+    <div class="bsearch-result" id="bsearch-result"></div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat"><div class="stat-val" id="v-total">0</div><div class="stat-lbl">Contacts</div></div>
+    <div class="stat"><div class="stat-val" id="v-steps">—</div><div class="stat-lbl">Search Steps</div></div>
+    <div class="stat"><div class="stat-val" id="v-complexity">—</div><div class="stat-lbl">Max Steps (log₂n)</div></div>
+    <div class="stat"><div class="stat-val" id="v-last">—</div><div class="stat-lbl">Last Found</div></div>
+  </div>
+
+  <!-- Add Contact -->
+  <div class="add-section">
+    <div class="search-title" style="margin-bottom:12px;">Add Contact</div>
+    <div class="add-row">
+      <input id="add-name" placeholder="Full name *"/>
+      <input id="add-phone" placeholder="Phone number"/>
+      <input id="add-email" placeholder="Email address"/>
+      <button class="btn primary" onclick="addContact()">+ Add</button>
+      <button class="btn amber" onclick="loadSamples()">⚡ Load Samples</button>
+      <button class="btn danger" onclick="clearAll()">✕ Clear All</button>
+    </div>
+  </div>
+
+  <!-- Contact List -->
+  <div class="list-section">
+    <div class="list-header">
+      <span class="list-header-title">All Contacts</span>
+      <span class="list-header-count" id="list-count">0 contacts</span>
+    </div>
+    <div id="contact-list">
+      <div class="empty-state">
+        <span class="empty-icon">📒</span>
+        <div class="empty-txt">No contacts yet — add one above or load samples!</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let contacts = [];
+let lastSearchSteps = 0;
+let highlightName = null;
+
+const avatarColors = [
+  ['#e0f2ef','#0d7a6e'],['#fdf3e0','#c47c1a'],['#fdecea','#c0392b'],
+  ['#eef2ff','#4f46e5'],['#fdf4ff','#9333ea'],['#f0fdf4','#16a34a'],
+];
+
+function avatarColor(name) {
+  const i = name.charCodeAt(0) % avatarColors.length;
+  return avatarColors[i];
+}
+
+function insertSorted(contact) {
+  let lo = 0, hi = contacts.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (contacts[mid].name.toLowerCase() < contact.name.toLowerCase()) lo = mid + 1;
+    else hi = mid;
+  }
+  contacts.splice(lo, 0, contact);
+}
+
+function binarySearch(name) {
+  const key = name.toLowerCase().trim();
+  let lo = 0, hi = contacts.length - 1;
+  const steps = [];
+  while (lo <= hi) {
+    const mid = Math.floor((lo + hi) / 2);
+    const midName = contacts[mid].name.toLowerCase();
+    const cmp = key.localeCompare(midName);
+    steps.push({ lo, hi, mid, midName: contacts[mid].name, cmp });
+    if (cmp === 0) return { found: true, index: mid, steps };
+    else if (cmp < 0) hi = mid - 1;
+    else lo = mid + 1;
+  }
+  return { found: false, index: -1, steps };
+}
+
+function doSearch() {
+  const q = document.getElementById('search-in').value.trim();
+  if (!q) { showToast('Enter a name to search'); return; }
+  if (contacts.length === 0) { showToast('No contacts to search'); return; }
+
+  const result = binarySearch(q);
+  lastSearchSteps = result.steps.length;
+  highlightName = result.found ? contacts[result.index].name : null;
+
+  document.getElementById('v-steps').textContent = result.steps.length;
+  document.getElementById('v-complexity').textContent = Math.ceil(Math.log2(contacts.length + 1));
+  document.getElementById('v-last').textContent = result.found ? contacts[result.index].name.split(' ')[0] : '—';
+
+  renderBSearchBox(q, result);
+  renderList();
+  if (result.found) {
+    setTimeout(() => {
+      const el = document.querySelector('.contact-row.highlight');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 400);
+  }
+}
+
+function liveSearch() {
+  const q = document.getElementById('search-in').value.trim();
+  if (!q) { highlightName = null; clearBSearch(); renderList(); return; }
+}
+
+function clearSearch() {
+  document.getElementById('search-in').value = '';
+  highlightName = null;
+  lastSearchSteps = 0;
+  clearBSearch();
+  document.getElementById('v-steps').textContent = '—';
+  document.getElementById('v-last').textContent = '—';
+  renderList();
+}
+
+function clearBSearch() {
+  const box = document.getElementById('bsearch-box');
+  box.classList.remove('visible');
+}
+
+function renderBSearchBox(query, result) {
+  const box = document.getElementById('bsearch-box');
+  const stepsEl = document.getElementById('bsearch-steps');
+  const resEl = document.getElementById('bsearch-result');
+  box.classList.add('visible');
+
+  stepsEl.innerHTML = result.steps.map((s, i) => {
+    const arrow = s.cmp === 0 ? '=' : s.cmp < 0 ? '← go left' : '→ go right';
+    const cls = s.cmp === 0 ? 'found' : '';
+    return `<div class="bstep ${cls}" style="animation-delay:${i*0.06}s">
+      <div class="bstep-num">${i+1}</div>
+      <div class="bstep-text">mid[${s.mid}] = <strong>${s.midName}</strong> ${arrow}</div>
+      <div class="bstep-range">lo=${s.lo} hi=${s.hi}</div>
+    </div>`;
+  }).join('');
+
+  if (result.found) {
+    resEl.className = 'bsearch-result found';
+    resEl.textContent = '✓ Found "' + contacts[result.index].name + '" at index ' + result.index + ' in ' + result.steps.length + ' step(s)';
+  } else {
+    resEl.className = 'bsearch-result notfound';
+    resEl.textContent = '✗ "' + query + '" not found — searched ' + result.steps.length + ' step(s)';
+  }
+}
+
+function renderList() {
+  const el = document.getElementById('contact-list');
+  document.getElementById('v-total').textContent = contacts.length;
+  document.getElementById('v-complexity').textContent = contacts.length > 0 ? Math.ceil(Math.log2(contacts.length + 1)) : '—';
+  document.getElementById('list-count').textContent = contacts.length + ' contact' + (contacts.length !== 1 ? 's' : '');
+
+  if (contacts.length === 0) {
+    el.innerHTML = '<div class="empty-state"><span class="empty-icon">📒</span><div class="empty-txt">No contacts — add one above!</div></div>';
+    return;
+  }
+
+  const groups = {};
+  contacts.forEach((c, i) => {
+    const letter = c.name[0].toUpperCase();
+    if (!groups[letter]) groups[letter] = [];
+    groups[letter].push({ ...c, idx: i });
+  });
+
+  el.innerHTML = Object.keys(groups).sort().map(letter => `
+    <div class="alpha-group">
+      <div class="alpha-letter">${letter}</div>
+      ${groups[letter].map(c => {
+        const [bg, fg] = avatarColor(c.name);
+        const initials = c.name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+        const isHL = highlightName && c.name === highlightName;
+        return `<div class="contact-row ${isHL?'highlight':''}">
+          <div class="contact-avatar" style="background:${bg};color:${fg};">${initials}</div>
+          <div class="contact-info">
+            <div class="contact-name">${c.name}</div>
+            ${c.phone ? `<div class="contact-phone">${c.phone}</div>` : ''}
+            ${c.email ? `<div class="contact-email">${c.email}</div>` : ''}
+          </div>
+          <div class="contact-idx">[${c.idx}]</div>
+          <button class="del-btn" onclick="deleteContact(${c.idx})">✕</button>
+        </div>`;
+      }).join('')}
+    </div>
+  `).join('');
+}
+
+function addContact() {
+  const name = document.getElementById('add-name').value.trim();
+  const phone = document.getElementById('add-phone').value.trim();
+  const email = document.getElementById('add-email').value.trim();
+  if (!name) { document.getElementById('add-name').style.boxShadow='0 0 0 2px #c0392b'; setTimeout(()=>document.getElementById('add-name').style.boxShadow='',1200); showToast('Name is required'); return; }
+  if (contacts.find(c => c.name.toLowerCase() === name.toLowerCase())) { showToast('"'+name+'" already exists'); return; }
+  insertSorted({ name, phone, email });
+  document.getElementById('add-name').value = '';
+  document.getElementById('add-phone').value = '';
+  document.getElementById('add-email').value = '';
+  highlightName = null;
+  showToast('"' + name + '" added & sorted');
+  renderList();
+}
+
+function deleteContact(idx) {
+  const name = contacts[idx].name;
+  contacts.splice(idx, 1);
+  if (highlightName === name) highlightName = null;
+  showToast('"' + name + '" removed');
+  renderList();
+}
+
+function clearAll() {
+  contacts = []; highlightName = null;
+  clearBSearch();
+  document.getElementById('v-steps').textContent = '—';
+  document.getElementById('v-last').textContent = '—';
+  showToast('All contacts cleared');
+  renderList();
+}
+
+const sampleContacts = [
+  { name:'Aarav Shah',      phone:'+91 98200 11234', email:'aarav.shah@email.com' },
+  { name:'Priya Nair',      phone:'+91 97300 22345', email:'priya.nair@email.com' },
+  { name:'Rohan Mehta',     phone:'+91 96400 33456', email:'rohan.mehta@email.com' },
+  { name:'Preeti Patil',     phone:'+91 95500 44567', email:'sneha.patil@email.com' },
+  { name:'Arjun Sharma',    phone:'+91 94600 55678', email:'arjun.s@email.com' },
+  { name:'Divya Krishnan',  phone:'+91 93700 66789', email:'divya.k@email.com' },
+  { name:'Meera Iyer',      phone:'+91 91900 88901', email:'meera.i@email.com' },
+  { name:'Nikhil Joshi',    phone:'+91 90000 99012', email:'nikhil.j@email.com' },
+  { name:'Tanvi Desai',     phone:'+91 89100 10123', email:'tanvi.d@email.com' },
+];
+
+function loadSamples() {
+  let added = 0;
+  sampleContacts.forEach(c => {
+    if (!contacts.find(x => x.name.toLowerCase() === c.name.toLowerCase())) {
+      insertSorted(c); added++;
+    }
+  });
+  showToast('Added ' + added + ' sample contacts ⚡');
+  renderList();
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2300);
+}
+
+document.getElementById('add-name').addEventListener('keydown', e => { if (e.key === 'Enter') addContact(); });
+document.getElementById('search-in').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+
+// Default 4 contacts
+[
+  { name:'Kinjal Shukla',     phone:'+91 98200 11234', email:'kinjal.shukla@email.com' },
+  { name:'Radheya Tripathi',     phone:'+91 97300 22345', email:'radheya.tripathi@email.com' },
+  { name:'Sneha Dwivedi',    phone:'+91 95500 44567', email:'sneha.dwivedi@email.com' },
+  { name:'Kabir Malhotra',  phone:'+91 92800 77890', email:'kabir.malhotra@email.com' }
+].forEach(c => insertSorted(c));
+
+renderList();
+</script>
+</body>
+</html>
